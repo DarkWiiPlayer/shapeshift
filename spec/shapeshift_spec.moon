@@ -37,3 +37,4 @@ describe 'shapeshift', ->
 			assert.equal false, test(false)
 	pending 'any', ->
 	pending 'all', ->
+	pending 'default', ->

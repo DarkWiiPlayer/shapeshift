@@ -106,4 +106,20 @@ function shapeshift.all(validations)
 	end
 end
 
+--- Provides a default value for a test subject.
+-- The default is returned when the subject, optionally filtered through another test,
+-- returns nil. Otherwise this value is returned unmodified.
+function shapeshift.default(default, test)
+	return function(subject)
+		if test then
+			subject = test(subject)
+		end
+		if subject ~= nil then
+			return subject
+		else
+			return default
+		end
+	end
+end
+
 return shapeshift
