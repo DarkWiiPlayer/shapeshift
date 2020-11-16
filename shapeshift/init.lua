@@ -4,6 +4,8 @@
 
 local shapeshift = {}
 
+shapeshift.is = require 'shapeshift.is'
+
 --- Validates a table against a prototype.
 local function validate_table(prototype, subject, prefix)
 	local transformed = {}
