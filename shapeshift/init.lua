@@ -24,7 +24,6 @@ local function validate_table(prototype, subject, prefix)
 end
 
 --- Partially applies `shapeshift.table` with a given prototype.
--- Keys not in the prototype get silently dropped.
 -- The special option `__extra` can be "drop", "keep" or absent to either drop
 -- keys that are not in the prototype, keep them "as is" in the result or
 -- (default) throw an error respectively.
