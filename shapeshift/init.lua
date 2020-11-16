@@ -7,18 +7,16 @@ local shapeshift = {}
 shapeshift.is = require 'shapeshift.is'
 
 --- Validates a table against a prototype.
-local function validate_table(prototype, subject, prefix)
+local function validate_table(prototype, subject)
 	local transformed = {}
-	local prefix = prefix or tostring(subject)
 
 	for key, validator in pairs(prototype) do
 		if key:sub(1,2) ~= "__" then
-			local prefix = prefix and prefix..'.'..tostring(key) or tostring(key)
 			local result, message = validator(subject[key])
 			if result then
 				transformed[key] = result
 			else
-				return nil, tostring(prefix) .. ": " .. (message or 'Validation Failed')
+				return nil, tostring(key) .. ": " .. (message or 'Validation Failed')
 			end
 		end
 	end
@@ -35,11 +33,11 @@ end
 function shapeshift.table(prototype, extra)
 	extra = extra or prototype.__extra
 	if extra == "drop" then
-		return function(subject, prefix)
+		return function(subject)
 			return validate_table(prototype, subject)
 		end
 	elseif extra == "keep" then
-		return function(subject, prefix)
+		return function(subject)
 			local result, message = validate_table(prototype, subject)
 			if result then
 				for key in pairs(subject) do
@@ -51,13 +49,13 @@ function shapeshift.table(prototype, extra)
 			return result, message
 		end
 	else
-		return function(subject, prefix)
+		return function(subject)
 			for key in pairs(subject) do
 				if not prototype[key] then
-					return nil, "Unexpected key: "..tostring(key).." in "..tostring(prefix)
+					return nil, "Unexpected key: "..tostring(key)
 				end
 			end
-			return validate_table(prototype, subject, prefix)
+			return validate_table(prototype, subject)
 		end
 	end
 end
@@ -77,15 +75,18 @@ end
 -- The result of the first successful validation is returned.
 -- Additional validations will not be tried.
 function shapeshift.any(validations)
-	return function(subject, prefix)
-		local prefix = prefix or tostring(subject)
+	return function(subject)
+		local messages = { "+++" }
 		for i, validation in ipairs(validations) do
-			local result = validation(subject, prefix)
+			local result, message = validation(subject)
 			if result then
 				return result
+			else
+				table.insert(messages, "\t"..message)
 			end
 		end
-		return false, tostring(prefix)..": Did not meet any validation"
+		table.insert(messages, "---")
+		return false, "Did not meet any validation:\n"..table.concat(messages, "\n")
 	end
 end
 
@@ -93,11 +94,10 @@ end
 -- The result of each validation is fed into the next one.
 -- This allows for validation "pipelines" to continuously transform data.
 function shapeshift.all(validations)
-	return function(subject, prefix)
-		local prefix = prefix or tostring(subject)
+	return function(subject)
 		for i, validation in ipairs(validations) do
 			local message
-			subject, message = validation(subject, prefix)
+			subject, message = validation(subject)
 			if not subject then
 				return nil, message
 			end
