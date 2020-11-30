@@ -65,7 +65,7 @@ end
 -- Additional validations will not be tried.
 function shapeshift.any(validations)
 	return function(subject)
-		local messages = { "+++" }
+		local messages = { "Did not meet any validation:", "+++" }
 		for i, validation in ipairs(validations) do
 			local result, message = validation(subject)
 			if result then
@@ -75,7 +75,7 @@ function shapeshift.any(validations)
 			end
 		end
 		table.insert(messages, "---")
-		return false, "Did not meet any validation:\n"..table.concat(messages, "\n")
+		return false, table.concat(messages, "\n")
 	end
 end
 
