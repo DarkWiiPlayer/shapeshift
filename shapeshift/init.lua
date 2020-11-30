@@ -60,17 +60,6 @@ function shapeshift.table(prototype, extra)
 	end
 end
 
---- A validator that returns the passed-in default object when the subject is `nil`.
-function shapeshift.default(default)
-	return function(subject)
-		if subject == nil then
-			return default
-		else
-			return subject
-		end
-	end
-end
-
 --- Run a list of validations on a subject and fail if none succeeds.
 -- The result of the first successful validation is returned.
 -- Additional validations will not be tried.
