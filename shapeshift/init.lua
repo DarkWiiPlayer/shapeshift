@@ -40,6 +40,34 @@ local function validate_table(prototype, subject)
 	return transformed
 end
 
+--- Static Validators
+-- @section validators
+
+--- Tries to convert a value to a number.
+function shapeshift.tonumber(subject)
+	local number = tonumber(subject)
+	if number then
+		return number
+	else
+		return nil, "Could not be converted to number"
+	end
+end
+
+--- Tries to convert a value to a number.
+-- This shouldn't ever fail, but a custom
+-- `__tostring` *could* return nil.
+function shapeshift.tostring(subject)
+	local str = tonumber(subject)
+	if str then
+		return str
+	else
+		return nil, "Could not be converted to string"
+	end
+end
+
+--- Validator Generators
+-- @section generators
+
 --- Partially applies `shapeshift.table` with a given prototype.
 -- The special option `__extra` can be "drop", "keep" or absent to either drop
 -- keys that are not in the prototype, keep them "as is" in the result or
