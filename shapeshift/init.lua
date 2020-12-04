@@ -106,6 +106,17 @@ function shapeshift.table(prototype, extra)
 	end
 end
 
+--- Runs a validation only if the subject is not nil.
+function shapeshift.maybe(validation)
+	return function(subject)
+		if subject == nil then
+			return NIL
+		else
+			return validation(subject)
+		end
+	end
+end
+
 --- Run a list of validations on a subject and fail if none succeeds.
 -- The result of the first successful validation is returned.
 -- Additional validations will not be tried.
