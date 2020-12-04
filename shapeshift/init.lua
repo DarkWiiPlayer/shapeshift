@@ -5,6 +5,7 @@
 local shapeshift = {}
 
 shapeshift.is = require 'shapeshift.is'
+local NIL = shapeshift.is.NIL
 
 --- Creates an assertion helper.
 -- The returned function returns all of its parameters as is
@@ -28,7 +29,7 @@ local function validate_table(prototype, subject)
 	local transformed = {}
 
 	for key, validator in pairs(prototype) do
-		if key:sub(1,2) ~= "__" then
+		if key:sub(1,2) ~= "__" and subject[key] ~= NIL then
 			local result, message = validator(subject[key])
 			if result then
 				transformed[key] = result

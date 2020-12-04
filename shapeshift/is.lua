@@ -11,4 +11,14 @@ function __is:__index(key)
 	return self[key]
 end
 
-return setmetatable({}, __is)
+local is = { NIL = {} }
+
+is["nil"] = function(value)
+	if value == nil then
+		return is.NIL
+	else
+		return nil, "nil expected, got " .. type(value)
+	end
+end
+
+return setmetatable(is, __is)
