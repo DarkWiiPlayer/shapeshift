@@ -119,13 +119,22 @@ end
 
 --- Transformation that maps values using a table.
 function shapeshift.map(map)
-	return function(subject)
-		local value = map[subject]
-		if value then
-			return value
-		else
-			return nil, string.format("Value %s is not a key of %s", tostring(subject), tostring(map))
+	if type(map) == "table" then
+		return function(subject)
+			local value = map[subject]
+			if value then
+				return value
+			else
+				return nil, string.format("Value %s is not a key of %s", tostring(subject), tostring(map))
+			end
 		end
+	elseif type(map) == "function" then
+		local as = assertion("Value is not a key of %s"..tostring(map))
+		return function(subject)
+			return as(map(subject))
+		end
+	else
+		error("Validation mapping is neither table nor function")
 	end
 end
 
