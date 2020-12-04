@@ -106,6 +106,17 @@ function shapeshift.table(prototype, extra)
 	end
 end
 
+--- Makes sure that the subject is a specific object.
+function shapeshift.eq(other)
+	return function(subject)
+		if other == subject then
+			return subject
+		else
+			return nil, string.format("Expected %s to be %s", tostring(subject), tostring(object))
+		end
+	end
+end
+
 --- Runs a validation only if the subject is not nil.
 function shapeshift.maybe(validation)
 	return function(subject)
