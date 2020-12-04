@@ -119,7 +119,7 @@ function shapeshift.any(validations, ...)
 			if result then
 				return result
 			else
-				table.insert(messages, "\t"..message)
+				table.insert(messages, "\t"..tostring(message))
 			end
 		end
 		table.insert(messages, "---")
