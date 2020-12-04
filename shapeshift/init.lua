@@ -6,6 +6,23 @@ local shapeshift = {}
 
 shapeshift.is = require 'shapeshift.is'
 
+--- Creates an assertion helper.
+-- The returned function returns all of its parameters as is
+-- except when the first argument is nil,
+-- in which case it returns nil plus an error message.
+-- Avoid calling in-place, as closure creation is NYI.
+-- @tparam string message A fallback-message for the assertion.
+-- @treturn function Assertion helper bound to `message`
+local function assertion(message)
+	return function(...)
+		if ... then
+			return ...
+		else
+			return nil, message
+		end
+	end
+end
+
 --- Validates a table against a prototype.
 local function validate_table(prototype, subject)
 	local transformed = {}
@@ -113,6 +130,34 @@ function shapeshift.default(default, test)
 			return subject
 		else
 			return default
+		end
+	end
+end
+
+--- Confirms that the input is a string and matches a given pattern.
+-- The pattern is *not* anchored and can match anywhere in the string.
+-- Add ^ and $ if it should only match the whole string.
+function shapeshift.matches(pattern)
+	return function(subject)
+		if type(subject)=="string" and string.find(subject, pattern) then
+			return subject
+		else
+			return nil, string.format('Subject [[%s]] does not match pattern [[%s]]', subject, pattern)
+		end
+	end
+end
+
+do local match_assertion = assertion("Subject does not match pattern")
+	--- Confirms that the input is a string and returns only the match for the given pattern.
+	-- The pattern is *not* anchored and can match anywhere in the string.
+	-- Add ^ and $ if it should only match the whole string.
+	function shapeshift.match(pattern)
+		return function(subject)
+			if type(subject)=="string" then
+				return match_assertion(string.match(subject, pattern))
+			else
+				return nil, string.format('Subject [[%s]] does not match pattern [[%s]]', subject, pattern)
+			end
 		end
 	end
 end
