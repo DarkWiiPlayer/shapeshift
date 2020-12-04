@@ -117,6 +117,18 @@ function shapeshift.eq(other)
 	end
 end
 
+--- Transformation that maps values using a table.
+function shapeshift.map(map)
+	return function(subject)
+		local value = map[subject]
+		if value then
+			return value
+		else
+			return nil, string.format("Value %s is not a key of %s", tostring(subject), tostring(map))
+		end
+	end
+end
+
 --- Runs a validation only if the subject is not nil.
 function shapeshift.maybe(validation)
 	return function(subject)
