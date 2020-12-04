@@ -13,6 +13,7 @@ dependencies = {
 build = {
    type = "builtin",
    modules = {
-      shapeshift = "shapeshift/init.lua"
+      shapeshift = "shapeshift/init.lua";
+      ["shapeshift.is"] = "shapeshift/is.lua";
    },
 }
