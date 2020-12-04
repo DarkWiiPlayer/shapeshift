@@ -63,7 +63,10 @@ end
 --- Run a list of validations on a subject and fail if none succeeds.
 -- The result of the first successful validation is returned.
 -- Additional validations will not be tried.
-function shapeshift.any(validations)
+function shapeshift.any(validations, ...)
+	if type(validations) ~= "table" then
+		return shapeshift.any{validations, ...}
+	end
 	return function(subject)
 		local messages = { "Did not meet any validation:", "+++" }
 		for i, validation in ipairs(validations) do
@@ -82,7 +85,10 @@ end
 --- Runs a list of validations on a subject and succeed if all of them do.
 -- The result of each validation is fed into the next one.
 -- This allows for validation "pipelines" to continuously transform data.
-function shapeshift.all(validations)
+function shapeshift.all(validations, ...)
+	if type(validations) ~= "table" then
+		return shapeshift.all{validations, ...}
+	end
 	return function(subject)
 		for i, validation in ipairs(validations) do
 			local message
