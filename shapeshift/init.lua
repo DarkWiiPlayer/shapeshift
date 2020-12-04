@@ -129,6 +129,15 @@ function shapeshift.map(map)
 	end
 end
 
+--- Validates that an object appears in a sequence.
+function shapeshift.oneof(sequence)
+	local map = {}
+	for i, element in ipairs(sequence) do
+		map[element]=element
+	end
+	return shapeshift.map(map)
+end
+
 --- Runs a validation only if the subject is not nil.
 function shapeshift.maybe(validation)
 	return function(subject)
