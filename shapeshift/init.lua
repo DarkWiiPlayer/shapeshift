@@ -54,11 +54,11 @@ function shapeshift.tonumber(subject)
 	end
 end
 
---- Tries to convert a value to a number.
+--- Tries to convert a value to a string.
 -- This shouldn't ever fail, but a custom
 -- `__tostring` *could* return nil.
 function shapeshift.tostring(subject)
-	local str = tonumber(subject)
+	local str = tostring(subject)
 	if str then
 		return str
 	else
