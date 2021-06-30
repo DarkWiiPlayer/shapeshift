@@ -219,6 +219,20 @@ function shapeshift.each(validation)
 	end
 end
 
+--- Runs a validation on every element of a sequence and keeps only those that pass.
+function shapeshift.filter(validation)
+	return function(subject)
+		local result = {}
+		for idx, value in ipairs(subject) do
+			value = validation(value)
+			if value then
+				table.insert(result, value)
+			end
+		end
+		return result
+	end
+end
+
 --- Provides a default value for a test subject.
 -- The default is returned when the subject, optionally filtered through another test,
 -- returns nil. Otherwise this value is returned unmodified.
