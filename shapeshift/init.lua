@@ -199,6 +199,21 @@ function shapeshift.all(validations, ...)
 	end
 end
 
+--- Runs a validation on every element of a sequence and fails unless all of them pass.
+function shapeshift.each(validation)
+	return function(subject)
+		for idx, value in ipairs(subject) do
+			local message
+			value, message = validation(value)
+			if not value then
+				return nil, "["..idx.."]: "..message
+			end
+			subject[idx] = value
+		end
+		return subject
+	end
+end
+
 --- Provides a default value for a test subject.
 -- The default is returned when the subject, optionally filtered through another test,
 -- returns nil. Otherwise this value is returned unmodified.
