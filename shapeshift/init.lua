@@ -2,9 +2,14 @@
 -- Somewhat inspired by leafo/tableshape, but more functional.
 -- @module shapeshift
 
-local shapeshift = {}
-
-shapeshift.is = require 'shapeshift.is'
+local function deepmodule(prefix)
+	return setmetatable({}, {
+		__index = function(self, name)
+			return require(prefix .. "." .. name)
+		end
+	})
+end
+local shapeshift = deepmodule(...)
 local NIL = shapeshift.is.NIL
 
 --- Creates an assertion helper.
