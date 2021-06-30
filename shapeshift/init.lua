@@ -37,7 +37,11 @@ local function validate_table(prototype, subject)
 		if key:sub(1,2) ~= "__" and subject[key] ~= NIL then
 			local result, message = validator(subject[key])
 			if result then
-				transformed[key] = result
+				if result == NIL then
+					transformed[key] = nil
+				else
+					transformed[key] = result
+				end
 			else
 				return nil, tostring(key) .. ": " .. (message or 'Validation Failed')
 			end
