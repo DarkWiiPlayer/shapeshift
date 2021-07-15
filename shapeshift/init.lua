@@ -2,6 +2,8 @@
 -- Somewhat inspired by leafo/tableshape, but more functional.
 -- @module shapeshift
 
+local generic = "Could not validate"
+
 local function deepmodule(prefix)
 	return setmetatable({}, {
 		__index = function(self, name)
@@ -10,44 +12,22 @@ local function deepmodule(prefix)
 	})
 end
 local shapeshift = deepmodule(...)
-local NIL = shapeshift.is.NIL
-
---- Creates an assertion helper.
--- The returned function returns all of its parameters as is
--- except when the first argument is nil,
--- in which case it returns nil plus an error message.
--- Avoid calling in-place, as closure creation is NYI.
--- @tparam string message A fallback-message for the assertion.
--- @treturn function Assertion helper bound to `message`
-local function assertion(message)
-	return function(...)
-		if ... then
-			return ...
-		else
-			return nil, message
-		end
-	end
-end
 
 --- Validates a table against a prototype.
 local function validate_table(prototype, subject)
 	local transformed = {}
 
 	for key, validator in pairs(prototype) do
-		if key:sub(1,2) ~= "__" and subject[key] ~= NIL then
-			local result, message = validator(subject[key])
-			if result then
-				if result == NIL then
-					transformed[key] = nil
-				else
-					transformed[key] = result
-				end
+		if key:sub(1,2)--[[GC]] ~= "__" then
+			local success, result = validator(subject[key])
+			if success then
+				transformed[key] = result
 			else
-				return nil, tostring(key) .. ": " .. (message or 'Validation Failed')
+				return false, tostring(key) .. ": " .. (result or generic)
 			end
 		end
 	end
-	return transformed
+	return true, transformed
 end
 
 --- Static Validators
@@ -57,9 +37,9 @@ end
 function shapeshift.tonumber(subject)
 	local number = tonumber(subject)
 	if number then
-		return number
+		return true, number
 	else
-		return nil, "Could not be converted to number"
+		return false, "Could not be converted to number"
 	end
 end
 
@@ -69,9 +49,9 @@ end
 function shapeshift.tostring(subject)
 	local str = tostring(subject)
 	if str then
-		return str
+		return true, str
 	else
-		return nil, "Could not be converted to string"
+		return false, "Could not be converted to string"
 	end
 end
 
@@ -93,21 +73,21 @@ function shapeshift.table(prototype, extra)
 		end
 	elseif extra == "keep" then
 		return function(subject)
-			local result, message = validate_table(prototype, subject)
-			if result then
+			local success, result = validate_table(prototype, subject)
+			if success then
 				for key in pairs(subject) do
 					if not prototype[key] then
 						result[key]=subject[key]
 					end
 				end
 			end
-			return result, message
+			return success, result
 		end
 	else
 		return function(subject)
 			for key in pairs(subject) do
 				if not prototype[key] then
-					return nil, "Unexpected key: "..tostring(key)
+					return false, "Unexpected key: "..tostring(key)
 				end
 			end
 			return validate_table(prototype, subject)
@@ -119,28 +99,27 @@ end
 function shapeshift.eq(other)
 	return function(subject)
 		if other == subject then
-			return subject
+			return true, subject
 		else
-			return nil, string.format("Expected %s to be %s", tostring(subject), tostring(object))
+			return false, string.format("Expected %s to be %s", tostring(subject), tostring(object))
 		end
 	end
 end
 
 --- Transformation that maps values using a table.
+-- Fails for values that do not appear in the given table. Never fails for functions.
 function shapeshift.map(map)
 	if type(map) == "table" then
 		return function(subject)
-			local value = map[subject]
-			if value then
-				return value
+			if map[subject] then
+				return true, map[subject]
 			else
-				return nil, string.format("Value %s is not a key of %s", tostring(subject), tostring(map))
+				return false, "Key "..subject.." not found in map/set"
 			end
 		end
 	elseif type(map) == "function" then
-		local as = assertion("Value is not a key of %s"..tostring(map))
 		return function(subject)
-			return as(map(subject))
+			return true, map(subject)
 		end
 	else
 		error("Validation mapping is neither table nor function")
@@ -159,10 +138,10 @@ end
 --- Runs a validation only if the subject is not nil.
 function shapeshift.maybe(validation)
 	return function(subject)
-		if subject == nil then
-			return NIL
-		else
+		if subject ~= nil then
 			return validation(subject)
+		else
+			return true, subject
 		end
 	end
 end
@@ -177,9 +156,9 @@ function shapeshift.any(validations, ...)
 	return function(subject)
 		local messages = { "Did not meet any validation:", "+++" }
 		for i, validation in ipairs(validations) do
-			local result, message = validation(subject)
-			if result then
-				return result
+			local success, result = validation(subject)
+			if success then
+				return true, result
 			else
 				table.insert(messages, "\t"..tostring(message))
 			end
@@ -199,12 +178,12 @@ function shapeshift.all(validations, ...)
 	return function(subject)
 		for i, validation in ipairs(validations) do
 			local message
-			subject, message = validation(subject)
-			if not subject then
-				return nil, message
+			success, subject = validation(subject)
+			if not success then
+				return false, subject
 			end
 		end
-		return subject
+		return true, subject
 	end
 end
 
@@ -212,14 +191,13 @@ end
 function shapeshift.each(validation)
 	return function(subject)
 		for idx, value in ipairs(subject) do
-			local message
-			value, message = validation(value)
-			if not value then
-				return nil, "["..idx.."]: "..message
+			success, result = validation(value)
+			if not success then
+				return false, "["..idx.."]: "..result
 			end
-			subject[idx] = value
+			subject[idx] = result
 		end
-		return subject
+		return true, subject
 	end
 end
 
@@ -228,8 +206,8 @@ function shapeshift.filter(validation)
 	return function(subject)
 		local result = {}
 		for idx, value in ipairs(subject) do
-			value = validation(value)
-			if value then
+			success, result = validation(value)
+			if success then
 				table.insert(result, value)
 			end
 		end
@@ -241,14 +219,13 @@ end
 -- The default is returned when the subject, optionally filtered through another test,
 -- returns nil. Otherwise this value is returned unmodified.
 function shapeshift.default(default, test)
+	test = test or function(subject) return subject~=nil, subject end
 	return function(subject)
-		if test then
-			subject = test(subject)
-		end
-		if subject ~= nil then
-			return subject
+		local success, result = test(subject)
+		if success then
+			return true, subject
 		else
-			return default
+			return true, default
 		end
 	end
 end
@@ -259,24 +236,9 @@ end
 function shapeshift.matches(pattern)
 	return function(subject)
 		if type(subject)=="string" and string.find(subject, pattern) then
-			return subject
+			return true, subject
 		else
-			return nil, string.format('Subject [[%s]] does not match pattern [[%s]]', subject, pattern)
-		end
-	end
-end
-
-do local match_assertion = assertion("Subject does not match pattern")
-	--- Confirms that the input is a string and returns only the match for the given pattern.
-	-- The pattern is *not* anchored and can match anywhere in the string.
-	-- Add ^ and $ if it should only match the whole string.
-	function shapeshift.match(pattern)
-		return function(subject)
-			if type(subject)=="string" then
-				return match_assertion(string.match(subject, pattern))
-			else
-				return nil, string.format('Subject [[%s]] does not match pattern [[%s]]', subject, pattern)
-			end
+			return false, string.format('Subject [[%s]] does not match pattern [[%s]]', subject, pattern)
 		end
 	end
 end

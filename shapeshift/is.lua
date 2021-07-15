@@ -3,21 +3,21 @@ local __is = {}
 function __is:__index(key)
 	self[key] = function(value)
 		if type(value) == tostring(key) then
-			return value
+			return true, value
 		else
-			return nil, key .. " expected, got " .. type(value)
+			return false, key .. " expected, got " .. type(value)
 		end
 	end
 	return self[key]
 end
 
-local is = { NIL = {} }
+local is = {}
 
 is["nil"] = function(value)
 	if value == nil then
-		return is.NIL
+		return true, value
 	else
-		return nil, "nil expected, got " .. type(value)
+		return false, "nil expected, got " .. type(value)
 	end
 end
 
