@@ -2,6 +2,14 @@
 -- Somewhat inspired by leafo/tableshape, but more functional.
 -- @module shapeshift
 
+local function table_map(tab, fn)
+	local result = {}
+	for idx, value in ipairs(tab) do
+		result[idx] = fn(value)
+	end
+	return result
+end
+
 local generic = "Could not validate"
 
 local function deepmodule(prefix)
@@ -132,7 +140,15 @@ function shapeshift.oneof(sequence)
 	for i, element in ipairs(sequence) do
 		map[element]=element
 	end
-	return shapeshift.map(map)
+	local joined
+	return function(subject)
+		if map[subject] then
+			return true, subject
+		else
+			joined = joined or table.concat(table_map(sequence, tostring), ', ')
+			return false, 'expected one of '..joined..'; got '..tostring(subject)
+		end
+	end
 end
 
 --- Runs a validation only if the subject is not nil.
