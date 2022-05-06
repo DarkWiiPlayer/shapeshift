@@ -162,6 +162,12 @@ function shapeshift.maybe(validation)
 	end
 end
 
+local function tabulate(str)
+	return (str:gsub("[^\n]+", function(line)
+		return "\t" .. line
+	end))
+end
+
 --- Run a list of validations on a subject and fail if none succeeds.
 -- The result of the first successful validation is returned.
 -- Additional validations will not be tried.
@@ -170,16 +176,15 @@ function shapeshift.any(validations, ...)
 		return shapeshift.any{validations, ...}
 	end
 	return function(subject)
-		local messages = { "Did not meet any validation:", "+++" }
+		local messages = { "Did not meet any validation:" }
 		for i, validation in ipairs(validations) do
 			local success, result = validation(subject)
 			if success then
 				return true, result
 			else
-				table.insert(messages, "\t"..tostring(message))
+				table.insert(messages, tabulate(tostring(result)))
 			end
 		end
-		table.insert(messages, "---")
 		return false, table.concat(messages, "\n")
 	end
 end
