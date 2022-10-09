@@ -14,7 +14,7 @@ local generic = "Could not validate"
 
 local function deepmodule(prefix)
 	return setmetatable({}, {
-		__index = function(self, name)
+		__index = function(_, name)
 			return require(prefix .. "." .. name)
 		end
 	})
@@ -109,7 +109,7 @@ function shapeshift.eq(other)
 		if other == subject then
 			return true, subject
 		else
-			return false, string.format("Expected %s to be %s", tostring(subject), tostring(object))
+			return false, string.format("Expected %s to be %s", tostring(subject), tostring(other))
 		end
 	end
 end
@@ -137,7 +137,7 @@ end
 --- Validates that an object appears in a sequence.
 function shapeshift.oneof(sequence)
 	local map = {}
-	for i, element in ipairs(sequence) do
+	for _, element in ipairs(sequence) do
 		map[element]=element
 	end
 	local joined
@@ -177,7 +177,7 @@ function shapeshift.any(validations, ...)
 	end
 	return function(subject)
 		local messages = { "Did not meet any validation:" }
-		for i, validation in ipairs(validations) do
+		for _, validation in ipairs(validations) do
 			local success, result = validation(subject)
 			if success then
 				return true, result
@@ -197,8 +197,8 @@ function shapeshift.all(validations, ...)
 		return shapeshift.all{validations, ...}
 	end
 	return function(subject)
-		for i, validation in ipairs(validations) do
-			local message
+		for _, validation in ipairs(validations) do
+			local success
 			success, subject = validation(subject)
 			if not success then
 				return false, subject
@@ -212,7 +212,7 @@ end
 function shapeshift.each(validation)
 	return function(subject)
 		for idx, value in ipairs(subject) do
-			success, result = validation(value)
+			local success, result = validation(value)
 			if not success then
 				return false, "["..idx.."]: "..result
 			end
@@ -226,8 +226,8 @@ end
 function shapeshift.filter(validation)
 	return function(subject)
 		local result = {}
-		for idx, value in ipairs(subject) do
-			success, result = validation(value)
+		for _, value in ipairs(subject) do
+			local success = validation(value)
 			if success then
 				table.insert(result, value)
 			end
@@ -244,7 +244,7 @@ function shapeshift.default(default, test)
 	return function(subject)
 		local success, result = test(subject)
 		if success then
-			return true, subject
+			return true, result
 		else
 			return true, default
 		end
