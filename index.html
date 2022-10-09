@@ -1,0 +1,481 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Shapeshift</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Shapeshift</h1>
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Local_Functions">Local Functions</a></li>
+<li><a href="#Static_Validators">Static Validators </a></li>
+<li><a href="#Validator_Generators">Validator Generators </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>shapeshift</strong></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="topics/readme.md.html">readme</a></li>
+  <li><a href="topics/license.md.html">license</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>shapeshift</code></h1>
+<p>Validates tables and data.</p>
+<p> Somewhat inspired by leafo/tableshape, but more functional.</p>
+
+
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#validate_table">validate_table (prototype, subject)</a></td>
+	<td class="summary">Validates a table against a prototype.</td>
+	</tr>
+</table>
+<h2><a href="#Static_Validators">Static Validators </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#tonumber">tonumber (subject)</a></td>
+	<td class="summary">Tries to convert a value to a number.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tostring">tostring (subject)</a></td>
+	<td class="summary">Tries to convert a value to a string.</td>
+	</tr>
+</table>
+<h2><a href="#Validator_Generators">Validator Generators </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#table">table (prototype, extra)</a></td>
+	<td class="summary">Partially applies <a href="index.html#table">shapeshift.table</a> with a given prototype.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#eq">eq (other)</a></td>
+	<td class="summary">Makes sure that the subject is a specific object.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#map">map (map)</a></td>
+	<td class="summary">Transformation that maps values using a table.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#oneof">oneof (sequence)</a></td>
+	<td class="summary">Validates that an object appears in a sequence.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#maybe">maybe (validation)</a></td>
+	<td class="summary">Runs a validation only if the subject is not nil.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#any">any (validations, ...)</a></td>
+	<td class="summary">Run a list of validations on a subject and fail if none succeeds.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#all">all (validations, ...)</a></td>
+	<td class="summary">Runs a list of validations on a subject and succeed if all of them do.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#each">each (validation)</a></td>
+	<td class="summary">Runs a validation on every element of a sequence and fails unless all of them pass.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#filter">filter (validation)</a></td>
+	<td class="summary">Runs a validation on every element of a sequence and keeps only those that pass.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#default">default (default, test)</a></td>
+	<td class="summary">Provides a default value for a test subject.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#matches">matches (pattern)</a></td>
+	<td class="summary">Confirms that the input is a string and matches a given pattern.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "validate_table"></a>
+    <strong>validate_table (prototype, subject)</strong>
+    </dt>
+    <dd>
+    Validates a table against a prototype.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">prototype</span>
+
+
+        </li>
+        <li><span class="parameter">subject</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Static_Validators"></a>Static Validators </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "tonumber"></a>
+    <strong>tonumber (subject)</strong>
+    </dt>
+    <dd>
+    Tries to convert a value to a number.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">subject</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "tostring"></a>
+    <strong>tostring (subject)</strong>
+    </dt>
+    <dd>
+    Tries to convert a value to a string.
+ This shouldn&rsquo;t ever fail, but a custom
+ <code>__tostring</code> <em>could</em> return nil.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">subject</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Validator_Generators"></a>Validator Generators </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "table"></a>
+    <strong>table (prototype, extra)</strong>
+    </dt>
+    <dd>
+    Partially applies <a href="index.html#table">shapeshift.table</a> with a given prototype.
+ The special option <code>__extra</code> can be &ldquo;drop&rdquo;, &ldquo;keep&rdquo; or absent to either drop
+ keys that are not in the prototype, keep them &ldquo;as is&rdquo; in the result or
+ (default) throw an error respectively.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">prototype</span>
+            <span class="types"><a class="type" href="index.html#table">table</a></span>
+         A table mapping keys to value-validations.
+        </li>
+        <li><span class="parameter">extra</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         When not nil, overrides <code>__extra</code> property.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "eq"></a>
+    <strong>eq (other)</strong>
+    </dt>
+    <dd>
+    Makes sure that the subject is a specific object.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "map"></a>
+    <strong>map (map)</strong>
+    </dt>
+    <dd>
+    Transformation that maps values using a table.
+ Fails for values that do not appear in the given table. Never fails for functions.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "oneof"></a>
+    <strong>oneof (sequence)</strong>
+    </dt>
+    <dd>
+    Validates that an object appears in a sequence.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">sequence</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "maybe"></a>
+    <strong>maybe (validation)</strong>
+    </dt>
+    <dd>
+    Runs a validation only if the subject is not nil.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">validation</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "any"></a>
+    <strong>any (validations, ...)</strong>
+    </dt>
+    <dd>
+    Run a list of validations on a subject and fail if none succeeds.
+ The result of the first successful validation is returned.
+ Additional validations will not be tried.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">validations</span>
+
+
+        </li>
+        <li><span class="parameter">...</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "all"></a>
+    <strong>all (validations, ...)</strong>
+    </dt>
+    <dd>
+    Runs a list of validations on a subject and succeed if all of them do.
+ The result of each validation is fed into the next one.
+ This allows for validation &ldquo;pipelines&rdquo; to continuously transform data.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">validations</span>
+
+
+        </li>
+        <li><span class="parameter">...</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "each"></a>
+    <strong>each (validation)</strong>
+    </dt>
+    <dd>
+    Runs a validation on every element of a sequence and fails unless all of them pass.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">validation</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "filter"></a>
+    <strong>filter (validation)</strong>
+    </dt>
+    <dd>
+    Runs a validation on every element of a sequence and keeps only those that pass.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">validation</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "default"></a>
+    <strong>default (default, test)</strong>
+    </dt>
+    <dd>
+    Provides a default value for a test subject.
+ The default is returned when the subject, optionally filtered through another test,
+ returns nil. Otherwise this value is returned unmodified.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">default</span>
+
+
+        </li>
+        <li><span class="parameter">test</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "matches"></a>
+    <strong>matches (pattern)</strong>
+    </dt>
+    <dd>
+    Confirms that the input is a string and matches a given pattern.
+ The pattern is <em>not</em> anchored and can match anywhere in the string.
+ Add ^ and $ if it should only match the whole string.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">pattern</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-10-09 10:40:03 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
