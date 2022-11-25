@@ -28,6 +28,11 @@ describe 'shapeshift', ->
 		it 'respects the __extra option', ->
 			assert.same { foo: "bar" }, select 2, shapeshift.table(__extra: "keep")(foo: "bar")
 			assert.same {  }, select 2, shapeshift.table(__extra: "drop")(foo: "bar")
+		it 'accepts validations for the __extra option', ->
+			assert.same { foo: "bar" }, select 2, shapeshift.table(__extra: shapeshift.is.string)(foo: "bar")
+			assert.false shapeshift.table(__extra: shapeshift.is.number)(foo: "bar")
+		it 'accepts transformations for the __extra option', ->
+			assert.same { ["1"]: "bar" }, select 2, shapeshift.table(__extra: shapeshift.tostring){"bar"}
 			
 	describe 'default', ->
 		it 'Returns the default only when subject is nil', ->

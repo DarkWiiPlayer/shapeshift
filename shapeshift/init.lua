@@ -69,7 +69,8 @@ end
 --- Partially applies `shapeshift.table` with a given prototype.
 -- The special option `__extra` can be "drop", "keep" or absent to either drop
 -- keys that are not in the prototype, keep them "as is" in the result or
--- (default) throw an error respectively.
+-- (default) throw an error respectively. It can also be a function, in which
+-- case it is treated as a validation/transformation for the key.
 -- @tparam table prototype A table mapping keys to value-validations.
 -- @tparam string extra When not nil, overrides `__extra` property.
 -- @usage
@@ -83,9 +84,26 @@ function shapeshift.table(prototype, extra)
 		return function(subject)
 			local success, result = validate_table(prototype, subject)
 			if success then
-				for key in pairs(subject) do
+				for key, value in pairs(subject) do
 					if not prototype[key] then
-						result[key]=subject[key]
+						result[key] = value
+					end
+				end
+			end
+			return success, result
+		end
+	elseif type(extra) == "function" then
+		return function(subject)
+			local success, result = validate_table(prototype, subject)
+			if success then
+				for key, value in pairs(subject) do
+					if not prototype[key] then
+						local key_success, key_result = extra(key, subject[key])
+						if not key_success then
+							return false, string.format("Key %s failed validation: %s", tostring(key), key_result)
+						else
+							result[key_result] = value
+						end
 					end
 				end
 			end
