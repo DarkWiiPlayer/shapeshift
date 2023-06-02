@@ -21,18 +21,18 @@ local function deepmodule(prefix)
 end
 local shapeshift = deepmodule(...)
 
+shapeshift.unknown = { "shapeshift.unknown unique token" }
+
 --- Validates a table against a prototype.
 local function validate_table(prototype, subject)
 	local transformed = {}
 
 	for key, validator in pairs(prototype) do
-		if key:sub(1,2)--[[GC]] ~= "__" then
-			local success, result = validator(subject[key])
-			if success then
-				transformed[key] = result
-			else
-				return false, tostring(key) .. ": " .. (result or generic)
-			end
+		local success, result = validator(subject[key])
+		if success then
+			transformed[key] = result
+		else
+			return false, tostring(key) .. ": " .. (result or generic)
 		end
 	end
 	return true, transformed
@@ -67,20 +67,20 @@ end
 -- @section generators
 
 --- Partially applies `shapeshift.table` with a given prototype.
--- The special option `__extra` can be "drop", "keep" or absent to either drop
--- keys that are not in the prototype, keep them "as is" in the result or
--- (default) throw an error respectively. It can also be a function, in which
--- case it is treated as a validation/transformation for the key.
+-- When the prototype has a the key `shapeshift.unknown`, the corresponding value will be used as a fallback for the
+-- `unknown` option.
 -- @tparam table prototype A table mapping keys to value-validations.
--- @tparam string extra When not nil, overrides `__extra` property.
--- @usage
-function shapeshift.table(prototype, extra)
-	extra = extra or prototype.__extra
-	if extra == "drop" then
+-- @param unknown String describing what to do with unknown keys. Possible values are "drop" to silently remove unknown
+-- values, "keep" to keep them in the table, nil or "error" to fail the validation when extra keys are present, or a
+-- function that acts as a filter/validator on the key.-- @usage
+function shapeshift.table(prototype, unknown)
+	unknown = unknown or prototype[shapeshift.unknown]
+	prototype[shapeshift.unknown] = nil
+	if unknown == "drop" then
 		return function(subject)
 			return validate_table(prototype, subject)
 		end
-	elseif extra == "keep" then
+	elseif unknown == "keep" then
 		return function(subject)
 			local success, result = validate_table(prototype, subject)
 			if success then
@@ -92,13 +92,13 @@ function shapeshift.table(prototype, extra)
 			end
 			return success, result
 		end
-	elseif type(extra) == "function" then
+	elseif type(unknown) == "function" then
 		return function(subject)
 			local success, result = validate_table(prototype, subject)
 			if success then
 				for key, value in pairs(subject) do
 					if not prototype[key] then
-						local key_success, key_result = extra(key, subject[key])
+						local key_success, key_result = unknown(key, subject[key])
 						if not key_success then
 							return false, string.format("Key %s failed validation: %s", tostring(key), key_result)
 						else
@@ -109,11 +109,11 @@ function shapeshift.table(prototype, extra)
 			end
 			return success, result
 		end
-	else
+	elseif unknown == nil or unknown == "error" then
 		return function(subject)
 			for key in pairs(subject) do
 				if not prototype[key] then
-					return false, "Unexpected key: "..tostring(key)
+					return false, "Unexpected key: " .. tostring(key)
 				end
 			end
 			return validate_table(prototype, subject)
