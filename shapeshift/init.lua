@@ -24,15 +24,17 @@ local shapeshift = deepmodule(...)
 shapeshift.unknown = { "shapeshift.unknown unique token" }
 
 --- Validates a table against a prototype.
-local function validate_table(prototype, subject)
-	local transformed = {}
+local function validate_table(prototype, subject, transformed)
+	transformed = transformed or {}
 
 	for key, validator in pairs(prototype) do
-		local success, result = validator(subject[key])
-		if success then
-			transformed[key] = result
-		else
-			return false, tostring(key) .. ": " .. (result or generic)
+		if transformed[key] == nil then
+			local success, result = validator(subject[key])
+			if success then
+				transformed[key] = result
+			else
+				return false, tostring(key) .. ": " .. (result or generic)
+			end
 		end
 	end
 	return true, transformed
@@ -94,20 +96,30 @@ function shapeshift.table(prototype, unknown)
 		end
 	elseif type(unknown) == "function" then
 		return function(subject)
-			local success, result = validate_table(prototype, subject)
-			if success then
-				for key, value in pairs(subject) do
-					if not prototype[key] then
-						local key_success, key_result = unknown(key, subject[key])
-						if not key_success then
-							return false, string.format("Key %s failed validation: %s", tostring(key), key_result)
+			local result = {}
+			for key, value in pairs(subject) do
+				if not prototype[key] then
+					local key_success, key_result = unknown(key, subject[key])
+					if key_success then
+						if subject[key_success] then
+							return false, string.format("Refusing to transform key %s into existing key %s", tostring(key), tostring(key_result))
+						end
+						if prototype[key_result] then
+							local success_value, result_value = prototype[key_result](value)
+							if success_value then
+								result[key_result] = result_value
+							else
+								return false, string.format("Validation failed for key %s (transformed from %s): %s", tostring(key_result), tostring(key), result_value)
+							end
 						else
 							result[key_result] = value
 						end
+					else
+						return false, string.format("Key %s failed validation: %s", tostring(key), key_result)
 					end
 				end
 			end
-			return success, result
+			return validate_table(prototype, subject, result)
 		end
 	elseif unknown == nil or unknown == "error" then
 		return function(subject)
