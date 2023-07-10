@@ -2,7 +2,7 @@ local __is = {}
 
 function __is:__index(key)
 	self[key] = function(value)
-		if type(value) == tostring(key) then
+		if type(value):lower() == tostring(key):lower() then
 			return true, value
 		else
 			return false, key .. " expected, got " .. type(value)
@@ -11,14 +11,6 @@ function __is:__index(key)
 	return self[key]
 end
 
-local is = {}
+local is = setmetatable({}, __is)
 
-is["nil"] = function(value)
-	if value == nil then
-		return true, value
-	else
-		return false, "nil expected, got " .. type(value)
-	end
-end
-
-return setmetatable(is, __is)
+return is
