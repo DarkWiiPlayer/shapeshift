@@ -25,14 +25,14 @@ describe 'shapeshift', ->
 			assert.truthy person { name: "Henry", age: 20 }
 		pending 'ignores keys starting with __', ->
 		-- Should this also apply to test subjects?
-		it 'respects the __extra option', ->
-			assert.same { foo: "bar" }, select 2, shapeshift.table(__extra: "keep")(foo: "bar")
-			assert.same {  }, select 2, shapeshift.table(__extra: "drop")(foo: "bar")
-		it 'accepts validations for the __extra option', ->
-			assert.same { foo: "bar" }, select 2, shapeshift.table(__extra: shapeshift.is.string)(foo: "bar")
-			assert.false shapeshift.table(__extra: shapeshift.is.number)(foo: "bar")
-		it 'accepts transformations for the __extra option', ->
-			assert.same { ["1"]: "bar" }, select 2, shapeshift.table(__extra: shapeshift.tostring){"bar"}
+		it 'respects the [shapeshift.unknown] option', ->
+			assert.same { foo: "bar" }, select 2, shapeshift.table([shapeshift.unknown]: "keep")(foo: "bar")
+			assert.same {  }, select 2, shapeshift.table([shapeshift.unknown]: "drop")(foo: "bar")
+		it 'accepts validations for the [shapeshift.unknown] option', ->
+			assert.same { foo: "bar" }, select 2, shapeshift.table([shapeshift.unknown]: shapeshift.is.string)(foo: "bar")
+			assert.false shapeshift.table([shapeshift.unknown]: shapeshift.is.number)(foo: "bar")
+		it 'accepts transformations for the [shapeshift.unknown] option', ->
+			assert.same { ["1"]: "bar" }, select 2, shapeshift.table([shapeshift.unknown]: shapeshift.tostring){"bar"}
 			
 	describe 'default', ->
 		it 'Returns the default only when subject is nil', ->
