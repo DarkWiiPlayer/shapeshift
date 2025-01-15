@@ -28,12 +28,14 @@ local function validate_table(prototype, subject, transformed)
 	transformed = transformed or {}
 
 	for key, validator in pairs(prototype) do
-		if transformed[key] == nil then
-			local success, result = validator(subject[key])
-			if success then
-				transformed[key] = result
-			else
-				return false, tostring(key) .. ": " .. (result or generic)
+		if key ~= shapeshift.unknown then
+			if transformed[key] == nil then
+				local success, result = validator(subject[key])
+				if success then
+					transformed[key] = result
+				else
+					return false, tostring(key) .. ": " .. (result or generic)
+				end
 			end
 		end
 	end
@@ -77,7 +79,6 @@ end
 -- function that acts as a filter/validator on the key.-- @usage
 function shapeshift.table(prototype, unknown)
 	unknown = unknown or prototype[shapeshift.unknown]
-	prototype[shapeshift.unknown] = nil
 	if unknown == "drop" then
 		return function(subject)
 			return validate_table(prototype, subject)
